@@ -11,6 +11,7 @@ def retrieve_data(reddit_client: Reddit, limit=10):
         content = {}
         content["url"] = submission.url
         content["title"] = submission.title
+        content["id"] = submission.id
         content["comments"] = []
 
         for i in range(min(10, len(submission.comments))):
