@@ -1,28 +1,27 @@
-import praw
-import os
-from dotenv import load_dotenv
+from praw import Reddit
+from tqdm import tqdm
 
-load_dotenv()
 
-reddit = praw.Reddit(
-    client_id=os.environ["CLIENT_ID"],
-    client_secret=os.environ["CLIENT_SECRET"],
-    user_agent=os.environ["USER_AGENT"],
-)
+def retrieve_data(reddit_client: Reddit, limit=10):
+    print("Retrieving data")
 
-contents = []
+    contents = []
 
-for submission in reddit.subreddit("TooAfraidToAsk+AskReddit").hot(limit=10):
-    content = {}
-    content["url"] = submission.url
-    content["title"] = submission.title
-    content["comments"] = []
-    print(len(submission.comments))
-    for i in range(min(10, len(submission.comments))):
-        content["comments"].append({
-            "url": submission.comments[i].permalink,
-            "id": submission.comments[i].id,
-            "body": submission.comments[i].body,
-        })
+    for submission in tqdm(reddit_client.subreddit("TooAfraidToAsk+AskReddit").hot(limit=limit)):
+        content = {}
+        content["url"] = submission.url
+        content["title"] = submission.title
+        content["comments"] = []
 
-    # print(content)
+        for i in range(min(10, len(submission.comments))):
+            content["comments"].append(
+                {
+                    "url": submission.comments[i].permalink,
+                    "id": submission.comments[i].id,
+                    "body": submission.comments[i].body,
+                }
+            )
+        
+        contents.append(content)
+
+    return contents
