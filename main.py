@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import praw
+import asyncpraw
 import os
 import asyncio
 from retrievedata import retrieve_data
@@ -15,30 +15,30 @@ MAX_LENGTH = 50
 
 
 async def main():
-    create_folders()
-
     load_dotenv()
 
-    reddit = praw.Reddit(
+    reddit = asyncpraw.Reddit(
         client_id=os.environ["CLIENT_ID"],
         client_secret=os.environ["CLIENT_SECRET"],
         user_agent=os.environ["USER_AGENT"],
     )
 
-    contents = retrieve_data(reddit, limit=1)
+    contents = await retrieve_data(reddit)
 
     async with async_playwright() as p:
         print("Loading browser")
 
         browser = await p.chromium.launch()
         page = await browser.new_page()
+        print("Going to Reddit")
         await page.goto("https://www.reddit.com/", timeout=0)
         page.on("dialog", lambda dialog: dialog.accept())
 
         if await page.get_by_text("Rejeter les cookies non essentiels").count() != 0:
             await page.get_by_text("Rejeter les cookies non essentiels").click()
-
+        print("Reddit loaded")
         for content in tqdm(contents):
+            create_folders()
             await text_to_speech(content)
             await take_screenshots(content, page)
             make_video(content)
