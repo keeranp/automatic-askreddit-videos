@@ -23,7 +23,8 @@ async def main():
         user_agent=os.environ["USER_AGENT"],
     )
 
-    contents = await retrieve_data(reddit)
+    contents = await retrieve_data(reddit, limit=20)
+    reddit.close()
 
     async with async_playwright() as p:
         print("Loading browser")
@@ -40,10 +41,10 @@ async def main():
         for content in tqdm(contents):
             create_folders()
             await text_to_speech(content)
-            await take_screenshots(content, page)
-            make_video(content)
+            screenshots_are_taken = await take_screenshots(content, page)
+            if screenshots_are_taken:
+                make_video(content)
 
         browser.close()
-
 
 asyncio.run(main())
