@@ -6,12 +6,16 @@ from random import randrange
 
 def make_video(content, max_length=50):
     os.makedirs(os.path.join("assets", "videos", content["id"]), exist_ok=True)
+    with open(os.path.join("assets", "videos", content["id"], "title.txt"), "w") as f:
+        f.write(content["title"])
+        f.write(" #reddit #redditreadings #redditstories #reddit_tiktok")
+
     title_audioclip = AudioFileClip(os.path.join("assets", "sounds", "title.mp3"))
 
     title_clip = ImageClip(os.path.join("assets", "images", "title.png"))
     title_clip = title_clip.set_duration(content["title_length"])
     title_clip = title_clip.set_audio(title_audioclip)
-    title_clip = title_clip.resize(width=1080)
+    title_clip = title_clip.resize(width=900)
     clips = [title_clip]
 
     i = 0
@@ -27,7 +31,7 @@ def make_video(content, max_length=50):
         )
         image_clip = image_clip.set_duration(content["comments"][i]["sound_length"])
         image_clip = image_clip.set_audio(comment_audioclip)
-        image_clip = image_clip.resize(width=1080)
+        image_clip = image_clip.resize(width=900)
 
         clips.append(image_clip)
 
@@ -40,7 +44,7 @@ def make_video(content, max_length=50):
     random_time = randrange(180, int(background_clip.duration) - int(length))
     background_clip = background_clip.subclip(random_time, random_time + length)
     background_clip = background_clip.crop(x1=656, width=608)
-    background_clip = background_clip.resize((1080,1920))
+    background_clip = background_clip.resize((1080, 1920))
 
     screenshots = concatenate_videoclips(clips, method="compose")
     video = CompositeVideoClip([background_clip, screenshots.set_position("center")])
